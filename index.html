@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CrudAuth - Premium Authentication System.">
+    <title>CrudAuth // Masuk</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            950: '#09090b',
+                            900: '#121214',
+                            800: '#1a1a1e',
+                            700: '#2a2a30',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Premium SaaS CSS Customizations -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #09090b;
+            overflow-x: hidden;
+        }
+        .saas-panel {
+            background: #18181b;
+            border: 1px solid #27272a;
+        }
+        .saas-input {
+            background: #09090b;
+            border: 1px solid #27272a;
+            color: #fff;
+            transition: all 0.15s ease-in-out;
+        }
+        .saas-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 1px #6366f1;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+    </style>
+</head>
+<body class="h-full text-zinc-100 flex flex-col antialiased bg-zinc-950">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full"></div>
+
+    <!-- Connectivity Alert Banner -->
+    <div id="offline-banner" class="hidden z-40 bg-rose-500/10 border-b border-rose-500/20 backdrop-blur-md px-4 py-2 text-center text-rose-300 text-sm font-medium transition-all duration-300">
+        <div class="flex items-center justify-center gap-2">
+            <i data-lucide="wifi-off" class="w-4 h-4 text-rose-400 animate-pulse"></i>
+            <span>Server backend offline! Silakan jalankan `npm start` di dalam folder `crud-auth`.</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow flex items-center justify-center p-4 relative z-10 w-full min-h-screen">
+
+        <!-- AUTHENTICATION CARD -->
+        <div class="w-full max-w-md transition-all duration-300">
+            <div class="saas-panel rounded-xl p-8 shadow-xl relative overflow-hidden">
+                
+                <!-- Branding Header -->
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 shadow-sm mb-3 text-white">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-white">CrudAuth</h1>
+                    <p class="text-xs text-zinc-400 mt-1">Masuk untuk mengelola dashboard Anda</p>
+                </div>
+
+                <!-- Form Tabs -->
+                <div class="flex border-b border-zinc-800 mb-6">
+                    <button class="flex-1 pb-3 text-sm font-semibold border-b-2 border-indigo-500 text-white transition-all">
+                        Masuk
+                    </button>
+                    <button onclick="window.location.href='register.html'" class="flex-1 pb-3 text-sm font-semibold border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-all">
+                        Daftar
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">Email</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                                <i data-lucide="mail" class="w-4.5 h-4.5"></i>
+                            </span>
+                            <input type="email" id="login-email" required class="saas-input w-full pl-10 pr-4 py-2.5 rounded-lg text-sm" placeholder="nama@email.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-medium uppercase tracking-wider text-zinc-400">Password</label>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                                <i data-lucide="lock" class="w-4.5 h-4.5"></i>
+                            </span>
+                            <input type="password" id="login-password" required class="saas-input w-full pl-10 pr-10 py-2.5 rounded-lg text-sm" placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300">
+                                <i data-lucide="eye" class="w-4.5 h-4.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm active:scale-[0.98] transition-all duration-150 mt-2 flex items-center justify-center gap-2 text-sm">
+                        <span id="login-btn-text">Masuk</span>
+                        <div id="login-spinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- JAVASCRIPT SYSTEM & SPA LOGIC -->
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Application State
+        let state = {
+            token: localStorage.getItem('token') || null
+        };
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons();
+            await checkApiConnectivity();
+            
+            if (state.token) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Test API Connectivity and show warning if offline
+        async function checkApiConnectivity() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/register`, { method: 'OPTIONS' });
+                document.getElementById('offline-banner').classList.add('hidden');
+                return true;
+            } catch (err) {
+                console.warn("API Server seems offline:", err);
+                document.getElementById('offline-banner').classList.remove('hidden');
+                return false;
+            }
+        }
+
+        // Toast Alert System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-zinc-900 border-zinc-800 text-emerald-400 shadow-lg',
+                error: 'bg-zinc-900 border-zinc-800 text-rose-400 shadow-lg',
+                info: 'bg-zinc-900 border-zinc-800 text-indigo-400 shadow-lg'
+            };
+
+            const icons = {
+                success: 'check-circle',
+                error: 'alert-triangle',
+                info: 'info'
+            };
+
+            toast.className = `border ${colors[type]} p-4 rounded-lg flex items-start gap-3 shadow-xl transition-all duration-300 transform translate-x-12 opacity-0 w-full`;
+            toast.innerHTML = `
+                <div class="mt-0.5">
+                    <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm font-semibold">${type.charAt(0).toUpperCase() + type.slice(1)}</p>
+                    <p class="text-xs opacity-90 mt-0.5 leading-relaxed text-zinc-300">${message}</p>
+                </div>
+                <button class="text-zinc-500 hover:text-zinc-300 p-0.5 rounded" onclick="this.parentElement.remove()">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons({ attrs: { class: 'w-4 h-4' } });
+
+            // Trigger Animation
+            setTimeout(() => {
+                toast.classList.remove('translate-x-12', 'opacity-0');
+            }, 10);
+
+            // Auto Remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        // Toggle Passwords Eye
+        function togglePasswordVisibility(id, btn) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i data-lucide="eye-off" class="w-4.5 h-4.5"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i data-lucide="eye" class="w-4.5 h-4.5"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        // Auth Logic: Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const btnText = document.getElementById('login-btn-text');
+            const spinner = document.getElementById('login-spinner');
+            
+            btnText.classList.add('opacity-0');
+            spinner.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.message || 'Login gagal');
+                }
+
+                localStorage.setItem('token', data.token);
+                showToast('Login berhasil! Mengakses dashboard...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btnText.classList.remove('opacity-0');
+                spinner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

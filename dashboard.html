@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CrudAuth Dashboard & CRUD Control Panel.">
+    <title>CrudAuth // Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            950: '#09090b',
+                            900: '#121214',
+                            800: '#1a1a1e',
+                            700: '#2a2a30',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Premium SaaS CSS Customizations -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #09090b;
+            overflow-x: hidden;
+        }
+        .saas-panel {
+            background: #18181b;
+            border: 1px solid #27272a;
+        }
+        .saas-card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            transition: all 0.15s ease-in-out;
+        }
+        .saas-card:hover {
+            border-color: #3f3f46;
+            background: #202024;
+        }
+        .saas-input {
+            background: #09090b;
+            border: 1px solid #27272a;
+            color: #fff;
+            transition: all 0.15s ease-in-out;
+        }
+        .saas-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 1px #6366f1;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+    </style>
+    <script>
+        // Router protection check BEFORE body paints
+        if (!localStorage.getItem('token')) {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body class="h-full text-zinc-100 flex flex-col antialiased bg-zinc-950">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full"></div>
+
+    <!-- Connectivity Alert Banner -->
+    <div id="offline-banner" class="hidden z-40 bg-rose-500/10 border-b border-rose-500/20 backdrop-blur-md px-4 py-2 text-center text-rose-300 text-sm font-medium transition-all duration-300">
+        <div class="flex items-center justify-center gap-2">
+            <i data-lucide="wifi-off" class="w-4 h-4 text-rose-400 animate-pulse"></i>
+            <span>Server backend offline! Silakan jalankan `npm start` di dalam folder `crud-auth`.</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow flex items-center justify-center p-4 relative z-10 w-full min-h-screen">
+
+        <!-- DASHBOARD CONTAINER -->
+        <div id="dashboard-section" class="w-full max-w-6xl my-8 transition-all duration-300">
+            
+            <!-- Dashboard Header -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold tracking-tight text-white">CrudAuth Dashboard</h2>
+                        <p class="text-xs text-zinc-400">Pusat manajemen pengguna & autentikasi sistem</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="saas-panel flex items-center gap-3 px-3 py-1.5 rounded-lg shadow-sm">
+                        <div id="user-avatar" class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
+                            U
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <div id="current-user-name" class="text-xs font-semibold text-white leading-tight">User Name</div>
+                            <div id="current-user-email" class="text-[10px] text-zinc-400 leading-tight">user@email.com</div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="handleLogout()" class="p-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-rose-400 hover:text-rose-300 transition-all duration-150 shadow-sm" title="Log Out">
+                        <i data-lucide="log-out" class="w-4.5 h-4.5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Showcase -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Stat 1: Total Users -->
+                <div class="saas-card rounded-lg p-5 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shadow-sm">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider leading-none">Total Pengguna</p>
+                        <h3 id="stat-total-users" class="text-2xl font-bold text-white mt-1.5 leading-none">0</h3>
+                    </div>
+                </div>
+
+                <!-- Stat 2: Active User ID -->
+                <div class="saas-card rounded-lg p-5 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shadow-sm">
+                        <i data-lucide="user-check" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider leading-none">ID Anda</p>
+                        <h3 id="stat-your-id" class="text-base font-bold text-white mt-1.5 leading-none truncate">-</h3>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Session Expiration -->
+                <div class="saas-card rounded-lg p-5 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shadow-sm">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider leading-none">Masa Sesi</p>
+                        <h3 class="text-sm font-bold text-white mt-1.5 leading-none">24 Jam (JWT)</h3>
+                    </div>
+                </div>
+
+                <!-- Stat 4: System Status -->
+                <div class="saas-card rounded-lg p-5 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 shadow-sm">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider leading-none">Status API</p>
+                        <div class="flex items-center gap-1.5 mt-1.5 leading-none">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                            <span class="text-xs font-semibold text-emerald-400">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table & CRUD Interface Panel -->
+            <div class="saas-panel rounded-xl overflow-hidden shadow-xl">
+                
+                <!-- Table Controls / Header -->
+                <div class="p-5 border-b border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/40">
+                    <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 flex-grow max-w-md">
+                        <!-- Search Box -->
+                        <div class="relative flex-grow">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                            </span>
+                            <input type="text" id="search-input" oninput="handleSearch()" class="saas-input w-full pl-10 pr-4 py-2 rounded-lg text-sm" placeholder="Cari nama atau email...">
+                        </div>
+                    </div>
+                    
+                    <!-- Action Button: Add User -->
+                    <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        <span>Tambah Pengguna</span>
+                    </button>
+                </div>
+
+                <!-- Table Content Container -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-zinc-400 text-xs font-semibold uppercase tracking-wider bg-zinc-900/20">
+                                <th class="py-4 px-6 w-20">ID</th>
+                                <th class="py-4 px-6">Nama Pengguna</th>
+                                <th class="py-4 px-6">Email</th>
+                                <th class="py-4 px-6 w-40">Tipe Akun</th>
+                                <th class="py-4 px-6 w-36 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body" class="divide-y divide-zinc-800 bg-transparent text-zinc-300">
+                            <!-- Rows will be injected here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Empty State -->
+                <div id="table-empty-state" class="hidden flex-col items-center justify-center p-12 text-center text-zinc-500 bg-transparent">
+                    <div class="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3">
+                        <i data-lucide="folder-open" class="w-6 h-6 text-zinc-500"></i>
+                    </div>
+                    <p class="text-sm font-medium text-zinc-300">Tidak ada data pengguna ditemukan</p>
+                    <p class="text-xs text-zinc-500 mt-1">Coba tambah pengguna baru atau sesuaikan kata kunci pencarian Anda.</p>
+                </div>
+
+                <!-- Table Loading State -->
+                <div id="table-loading-state" class="flex flex-col items-center justify-center p-16 text-center">
+                    <div class="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-3"></div>
+                    <p class="text-xs text-zinc-400">Memuat data pengguna...</p>
+                </div>
+            </div>
+
+            <!-- Footer Notes -->
+            <footer class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+                <p>Terhubung ke API Database MySQL // Kunci Keamanan Aktif</p>
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-indigo-500"></i>
+                    <span>Sistem Terenkripsi & Terlindungi JWT</span>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <!-- MODAL: ADD / REGISTER NEW USER FROM DASHBOARD -->
+    <div id="add-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="saas-panel w-full max-w-md rounded-xl p-6 shadow-2xl relative transform scale-95 opacity-0 transition-all duration-300">
+            <button onclick="closeAddModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 p-1 rounded-lg hover:bg-zinc-850 transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="mb-5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-400">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Tambah Pengguna</h3>
+                    <p class="text-xs text-zinc-400">Daftarkan akun pengguna baru ke sistem.</p>
+                </div>
+            </div>
+            <form onsubmit="handleAddUserSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Nama Lengkap</label>
+                    <input type="text" id="add-name" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="Nama Lengkap">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Email</label>
+                    <input type="email" id="add-email" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="nama@email.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Password</label>
+                    <input type="password" id="add-password" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="Minimal 6 karakter">
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeAddModal()" class="flex-1 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium py-2 rounded-lg text-sm transition-all duration-150">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg text-sm shadow-sm transition-all duration-150">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT USER -->
+    <div id="edit-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="saas-panel w-full max-w-md rounded-xl p-6 shadow-2xl relative transform scale-95 opacity-0 transition-all duration-300">
+            <button onclick="closeEditModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 p-1 rounded-lg hover:bg-zinc-850 transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="mb-5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-400">
+                    <i data-lucide="user-cog" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Edit Pengguna</h3>
+                    <p class="text-xs text-zinc-400">Perbarui profil informasi pengguna.</p>
+                </div>
+            </div>
+            <form onsubmit="handleEditSubmit(event)" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Nama Lengkap</label>
+                    <input type="text" id="edit-name" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="Nama Lengkap">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Email</label>
+                    <input type="email" id="edit-email" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="nama@email.com">
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium py-2 rounded-lg text-sm transition-all duration-150">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg text-sm shadow-sm transition-all duration-150">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CHANGE PASSWORD -->
+    <div id="password-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="saas-panel w-full max-w-md rounded-xl p-6 shadow-2xl relative transform scale-95 opacity-0 transition-all duration-300">
+            <button onclick="closePasswordModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 p-1 rounded-lg hover:bg-zinc-850 transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="mb-5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600/10 flex items-center justify-center text-indigo-400">
+                    <i data-lucide="key-round" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Ubah Password</h3>
+                    <p class="text-xs text-zinc-400">Masukkan password lama dan password baru.</p>
+                </div>
+            </div>
+            <form onsubmit="handlePasswordSubmit(event)" class="space-y-4">
+                <input type="hidden" id="password-user-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Password Lama</label>
+                    <input type="password" id="old-password" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="••••••••">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Password Baru</label>
+                    <input type="password" id="new-password" required class="saas-input w-full px-3.5 py-2 rounded-lg text-sm" placeholder="Minimal 6 karakter">
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closePasswordModal()" class="flex-1 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium py-2 rounded-lg text-sm transition-all duration-150">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg text-sm shadow-sm transition-all duration-150">
+                        Ubah Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DELETE CONFIRMATION -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="saas-panel w-full max-w-sm rounded-xl p-5 shadow-2xl relative text-center transform scale-95 opacity-0 transition-all duration-300">
+            <div class="w-12 h-12 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-3 text-rose-455">
+                <i data-lucide="trash-2" class="w-5 h-5 text-rose-400"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1.5">Hapus Pengguna?</h3>
+            <p class="text-xs text-zinc-400 mb-5 leading-relaxed">Tindakan ini tidak bisa dibatalkan. Akun pengguna akan dihapus secara permanen dari database.</p>
+            
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium py-2 rounded-lg text-sm transition-all duration-150">
+                    Batal
+                </button>
+                <button id="confirm-delete-btn" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-medium py-2 rounded-lg text-sm shadow-sm transition-all duration-150">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT SYSTEM & DASHBOARD LOGIC -->
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Application State
+        let state = {
+            token: localStorage.getItem('token') || null,
+            currentUser: null,
+            users: []
+        };
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', async () => {
+            lucide.createIcons();
+            
+            // Redirect if not authenticated
+            if (!state.token) {
+                window.location.replace('index.html');
+                return;
+            }
+
+            await checkApiConnectivity();
+            const isValid = await fetchProfile();
+            if (isValid) {
+                await loadDashboardData();
+            } else {
+                handleLogout();
+            }
+        });
+
+        // Test API Connectivity and show warning if offline
+        async function checkApiConnectivity() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/register`, { method: 'OPTIONS' });
+                document.getElementById('offline-banner').classList.add('hidden');
+                return true;
+            } catch (err) {
+                console.warn("API Server seems offline:", err);
+                document.getElementById('offline-banner').classList.remove('hidden');
+                return false;
+            }
+        }
+
+        // Generic API Fetcher Wrapper
+        async function fetchAPI(endpoint, options = {}) {
+            await checkApiConnectivity();
+
+            const url = `${API_BASE_URL}${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+
+            if (state.token) {
+                headers['Authorization'] = `Bearer ${state.token}`;
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
+
+            if (response.status === 401) {
+                const data = await response.json();
+                if (data.message === 'Token tidak valid' || data.message === 'Unauthorized') {
+                    showToast('Sesi kedaluwarsa. Silakan login kembali.', 'error');
+                    setTimeout(() => {
+                        handleLogout();
+                    }, 1500);
+                    throw new Error('Unauthorized');
+                }
+            }
+
+            return response;
+        }
+
+        // Toast Alert System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-zinc-900 border-zinc-800 text-emerald-400 shadow-lg',
+                error: 'bg-zinc-900 border-zinc-800 text-rose-400 shadow-lg',
+                info: 'bg-zinc-900 border-zinc-800 text-indigo-400 shadow-lg'
+            };
+
+            const icons = {
+                success: 'check-circle',
+                error: 'alert-triangle',
+                info: 'info'
+            };
+
+            toast.className = `border ${colors[type]} p-4 rounded-lg flex items-start gap-3 shadow-xl transition-all duration-300 transform translate-x-12 opacity-0 w-full`;
+            toast.innerHTML = `
+                <div class="mt-0.5">
+                    <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm font-semibold">${type.charAt(0).toUpperCase() + type.slice(1)}</p>
+                    <p class="text-xs opacity-90 mt-0.5 leading-relaxed text-zinc-300">${message}</p>
+                </div>
+                <button class="text-zinc-500 hover:text-zinc-300 p-0.5 rounded" onclick="this.parentElement.remove()">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons({ attrs: { class: 'w-4 h-4' } });
+
+            // Trigger Animation
+            setTimeout(() => {
+                toast.classList.remove('translate-x-12', 'opacity-0');
+            }, 10);
+
+            // Auto Remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        // Auth Logic: Logout
+        function handleLogout() {
+            state.token = null;
+            state.currentUser = null;
+            state.users = [];
+            localStorage.removeItem('token');
+            showToast('Anda telah keluar dari sistem.', 'info');
+            
+            setTimeout(() => {
+                window.location.replace('index.html');
+            }, 1000);
+        }
+
+        // Fetch Logged-in User Profile Information
+        async function fetchProfile() {
+            if (!state.token) return false;
+            try {
+                const payloadBase64 = state.token.split('.')[1];
+                const decoded = JSON.parse(atob(payloadBase64));
+                const userId = decoded.id;
+
+                const res = await fetchAPI(`/users/${userId}`);
+                if (!res.ok) return false;
+
+                const user = await res.json();
+                state.currentUser = user;
+                
+                // Update UI Profile Card
+                document.getElementById('current-user-name').innerText = user.name;
+                document.getElementById('current-user-email').innerText = user.email;
+                document.getElementById('user-avatar').innerText = user.name.charAt(0).toUpperCase();
+                document.getElementById('stat-your-id').innerText = `${user.id}`;
+                
+                return true;
+            } catch (err) {
+                console.error("Fetch profile failed:", err);
+                return false;
+            }
+        }
+
+        // Dashboard: Load User List & Statistics
+        async function loadDashboardData() {
+            const tableBody = document.getElementById('user-table-body');
+            const loadingState = document.getElementById('table-loading-state');
+            const emptyState = document.getElementById('table-empty-state');
+
+            loadingState.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            tableBody.innerHTML = '';
+
+            try {
+                const res = await fetchAPI('/users');
+                if (!res.ok) throw new Error('Gagal memuat pengguna');
+
+                const users = await res.json();
+                state.users = users;
+
+                document.getElementById('stat-total-users').innerText = users.length;
+                renderUsers(users);
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal memuat data dari server.', 'error');
+            } finally {
+                loadingState.classList.add('hidden');
+            }
+        }
+
+        // Dashboard: Render Users to Table
+        function renderUsers(usersList) {
+            const tableBody = document.getElementById('user-table-body');
+            const emptyState = document.getElementById('table-empty-state');
+            
+            tableBody.innerHTML = '';
+
+            if (usersList.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            usersList.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-zinc-900/30 border-b border-zinc-800 transition-all duration-150 text-sm";
+                
+                const isCurrentUser = state.currentUser && state.currentUser.id === user.id;
+
+                row.innerHTML = `
+                    <td class="py-3.5 px-6 font-semibold text-zinc-500 font-mono text-xs">#${user.id}</td>
+                    <td class="py-3.5 px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded bg-zinc-800 flex items-center justify-center text-[10px] font-semibold text-zinc-300">
+                                ${user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <span class="font-medium text-white flex items-center gap-2">
+                                    ${user.name}
+                                    ${isCurrentUser ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-indigo-950 text-indigo-400 border border-indigo-500/20 font-medium font-sans">Anda</span>' : ''}
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-6 text-zinc-400 font-mono text-xs">${user.email}</td>
+                    <td class="py-3.5 px-6">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border border-zinc-800 bg-zinc-900/60 text-zinc-400">
+                            Member
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-6 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="openPasswordModal(${user.id})" class="p-1.5 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-md text-zinc-400 hover:text-amber-400 transition-all duration-150" title="Ubah Password">
+                                <i data-lucide="key-round" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="openEditModal(${user.id}, '${user.name}', '${user.email}')" class="p-1.5 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-md text-zinc-400 hover:text-indigo-400 transition-all duration-150" title="Edit Profil">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="openDeleteModal(${user.id})" class="p-1.5 hover:bg-rose-500/10 border border-zinc-800 hover:border-rose-500/20 rounded-md text-zinc-400 hover:text-rose-400 transition-all duration-150" title="Hapus User">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Live Search Filtering
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const filtered = state.users.filter(user => 
+                user.name.toLowerCase().includes(query) || 
+                user.email.toLowerCase().includes(query)
+            );
+            renderUsers(filtered);
+        }
+
+        // MODAL TOGGLERS WITH TRANSITION EFFECTS
+        function toggleModal(modalId, show) {
+            const modal = document.getElementById(modalId);
+            const card = modal.querySelector('.saas-panel, .saas-card');
+            
+            if (show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100');
+                    card.classList.remove('scale-95', 'opacity-0');
+                    card.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            } else {
+                card.classList.remove('scale-100', 'opacity-100');
+                card.classList.add('scale-95', 'opacity-0');
+                modal.classList.remove('opacity-100');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // Create/Add User Modal Logic
+        function openAddModal() {
+            toggleModal('add-modal', true);
+        }
+
+        function closeAddModal() {
+            toggleModal('add-modal', false);
+            document.getElementById('add-name').value = '';
+            document.getElementById('add-email').value = '';
+            document.getElementById('add-password').value = '';
+        }
+
+        async function handleAddUserSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('add-name').value;
+            const email = document.getElementById('add-email').value;
+            const password = document.getElementById('add-password').value;
+
+            if (password.length < 6) {
+                showToast('Password minimal 6 karakter', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetchAPI('/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Gagal menambahkan user');
+
+                showToast(`Pengguna ${name} berhasil ditambahkan!`, 'success');
+                closeAddModal();
+                await loadDashboardData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Edit Modal Logic
+        function openEditModal(id, name, email) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-email').value = email;
+            toggleModal('edit-modal', true);
+        }
+
+        function closeEditModal() {
+            toggleModal('edit-modal', false);
+        }
+
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const name = document.getElementById('edit-name').value;
+            const email = document.getElementById('edit-email').value;
+
+            try {
+                const res = await fetchAPI(`/users/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name, email })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Gagal memperbarui user');
+
+                showToast('Informasi profil berhasil diperbarui', 'success');
+                closeEditModal();
+                
+                // If current user is updated, refresh profile card
+                if (state.currentUser && state.currentUser.id == id) {
+                    await fetchProfile();
+                }
+
+                await loadDashboardData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Change Password Modal Logic
+        function openPasswordModal(id) {
+            document.getElementById('password-user-id').value = id;
+            toggleModal('password-modal', true);
+        }
+
+        function closePasswordModal() {
+            toggleModal('password-modal', false);
+            document.getElementById('old-password').value = '';
+            document.getElementById('new-password').value = '';
+        }
+
+        async function handlePasswordSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('password-user-id').value;
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+
+            if (newPassword.length < 6) {
+                showToast('Password baru minimal 6 karakter', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetchAPI(`/change-password/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ oldPassword, newPassword })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Gagal mengubah password');
+
+                showToast('Password berhasil diubah', 'success');
+                closePasswordModal();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Delete Modal Logic
+        let userIdToDelete = null;
+
+        function openDeleteModal(id) {
+            userIdToDelete = id;
+            
+            // Check if user is trying to delete themselves
+            if (state.currentUser && state.currentUser.id === id) {
+                showToast('Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif!', 'error');
+                return;
+            }
+
+            toggleModal('delete-modal', true);
+            
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            confirmBtn.onclick = null;
+            confirmBtn.onclick = handleConfirmDelete;
+        }
+
+        function closeDeleteModal() {
+            toggleModal('delete-modal', false);
+            userIdToDelete = null;
+        }
+
+        async function handleConfirmDelete() {
+            if (!userIdToDelete) return;
+
+            try {
+                const res = await fetchAPI(`/users/${userIdToDelete}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Gagal menghapus user');
+
+                showToast('Pengguna berhasil dihapus secara permanen', 'success');
+                closeDeleteModal();
+                await loadDashboardData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
